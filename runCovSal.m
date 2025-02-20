@@ -70,4 +70,30 @@ for i = 1:length(subDirs)
     end
 end
 
+% SAVE STATS
+
+timePerSample = totalTime/totalSamples;
+
+folderName = 'Model_Stats'; % Define folder name to save stats
+% Check if the folder exists, if not, create it
+if ~exist(folderName, 'dir')
+    mkdir(folderName);
+end
+% Define file name and full path
+fileName = 'stats.csv';
+filePath = fullfile(folderName, fileName);
+modelName = "CovSal"; % This will be added as a column in the CSV
+% Data to save
+data = {modelName, totalTime, totalSamples, timePerSample};
+% Check if file exists
+if exist(filePath, 'file') == 2
+    % Append new data to existing file
+    writematrix(data, filePath, 'WriteMode', 'append');
+else
+    % Write with header if the file does not exist
+    header = ["Model", "TotalTime", "TotalSamples", "TimePerSample"];
+    writematrix(header, filePath);
+    writematrix(data, filePath, 'WriteMode', 'append');
+end
+
 disp('Processing complete.');
