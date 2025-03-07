@@ -2,6 +2,8 @@ clc;
 clear;
 close all;
 
+addpath(genpath("/media/Data/Attention_NN/matlab_models/CovSal"))
+
 % options for saliency estiomation
 options.size = 512;                     % size of rescaled image
 options.quantile = 1/10;                % parameter specifying the most similar regions in the neighborhood
@@ -17,6 +19,9 @@ totalSamples = 0;
 % Define input and output directories
 inputDir = '/media/Data/Attention_NN/matlab_models/imagenette2/train/';
 outputDir = '/media/Data/Attention_NN/matlab_models/CovSal_maps/';
+
+% inputDir = '/media/Data/Attention_NN/matlab_models/TEST_images/';
+% outputDir = '/media/Data/Attention_NN/matlab_models/TESTCovSal_maps/';
 
 % Create output directory if it doesn't exist
 if ~exist(outputDir, 'dir')
@@ -46,16 +51,23 @@ for i = 1:length(subDirs)
     for j = 1:length(imageFiles)
         imageName = imageFiles(j).name;
         inputImagePath = fullfile(inputSubDirPath, imageName);
+
+        % if the image is grayscale, skip it!
+        if checkGrayscale(inputImagePath)
+            continue
+        end
+
         % Modify the output filename to include "CovSal"
         [~, name, ext] = fileparts(imageName); % Extract filename and extension
         newImageName = strcat(name, '_CovSal', ext); % Append "_covsal" before the extension
         outputImagePath = fullfile(outputSubDirPath, newImageName); % Construct new output path
+        
+        % Visual saliency estimation with covariances and means
+        options.modeltype = 'SigmaPoints';
 
         % Start measuring time
         tic;
 
-        % Visual saliency estimation with covariances and means
-        options.modeltype = 'SigmaPoints';
         salmap = saliencymap(inputImagePath, options);
         normalizedSalMap = mat2gray(salmap);
 
@@ -74,7 +86,7 @@ end
 
 timePerSample = totalTime/totalSamples;
 
-folderName = 'Model_Stats'; % Define folder name to save stats
+folderName = '/media/Data/Attention_NN/matlab_models/Model_Stats'; % Define folder name to save stats
 % Check if the folder exists, if not, create it
 if ~exist(folderName, 'dir')
     mkdir(folderName);
@@ -88,12 +100,20 @@ data = {modelName, totalTime, totalSamples, timePerSample};
 % Check if file exists
 if exist(filePath, 'file') == 2
     % Append new data to existing file
-    writematrix(data, filePath, 'WriteMode', 'append');
+    writecell(data, filePath, 'WriteMode', 'append');
 else
     % Write with header if the file does not exist
     header = ["Model", "TotalTime", "TotalSamples", "TimePerSample"];
     writematrix(header, filePath);
-    writematrix(data, filePath, 'WriteMode', 'append');
+    writecell(data, filePath, 'WriteMode', 'append');
 end
 
 disp('Processing complete.');
+
+function isGray = checkGrayscale(imagePath)
+    % Read the image
+    img = imread(imagePath);
+    
+    % Check if the image has a single channel
+    isGray = (size(img, 3) == 1);
+end

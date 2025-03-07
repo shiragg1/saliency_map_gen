@@ -24,7 +24,7 @@ Faces=zeros(w,h);
 %-----------------%
 fprintf('Finding cars...'); tic;
 load FelzenszwalbDetectors/car_final.mat; % loads a car model
-boxes = gdetect(img, model, 0);
+boxes = detect(img, model, 0);
 top = nms(boxes, 0.4);
 
 bboxes = getboxes(model, boxes);
@@ -45,7 +45,7 @@ fprintf([num2str(toc), ' seconds \n']);
 %-----------------%
 fprintf('Finding people...'); tic;
 load FelzenszwalbDetectors/person_final.mat; % loads a person model
-boxes = gdetect(img, model, 0);
+boxes = detect(img, model, 0);
 top = nms(boxes, 0.4);
 
 bboxes = getboxes(model, boxes);
