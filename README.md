@@ -20,7 +20,6 @@ https://pkuml.org/resources/code.html
 
 Download the code: `wget http://pkuml.org/wp-content/uploads/2016/04/LDS.rar`
 Unzip file: `unrar x LDS.rar`
-# Note: need to install unrar with sudo! (`sudo yum install unrar`)
 note: run `mex mexSumOverScales.cc`
 
 # Judd
