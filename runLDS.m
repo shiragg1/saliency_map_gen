@@ -8,8 +8,8 @@ totalTime = 0;
 totalSamples = 0;
 
 % Define input and output directories
-inputDir = '/media/Data/Attention_NN/matlab_models/imagenette2/train/';
-outputDir = '/media/Data/Attention_NN/matlab_models/LDS_maps/';
+inputDir = '/media/Data/Attention_NN/matlab_models/imagenette2-320/train/';
+outputDir = '/media/Data/Attention_NN/matlab_models/LDS_maps_320/';
 
 % Create output directory if it doesn't exist
 if ~exist(outputDir, 'dir')
@@ -42,10 +42,22 @@ for i = 1:length(subDirs)
     for j = 1:length(imageFiles)
         imageName = imageFiles(j).name;
         inputImagePath = fullfile(inputSubDirPath, imageName);
+        
+        % if the image is grayscale, skip it!
+        if checkGrayscale(inputImagePath)
+            continue
+        end
+        
         % Modify the output filename to include "LDS"
         [~, name, ext] = fileparts(imageName); % Extract filename and extension
         newImageName = strcat(name, '_LDS', ext); % Append "_LDS" before the extension
         outputImagePath = fullfile(outputSubDirPath, newImageName); % Construct new output path
+
+        % Check if saliency map already exists
+        if exist(outputImagePath, 'file')
+            fprintf('Skipped (already exists): %s\n', outputImagePath);
+            continue;
+        end
 
         % Start measuring time
         tic;
@@ -91,3 +103,11 @@ else
 end
 
 disp('Processing complete.');
+
+function isGray = checkGrayscale(imagePath)
+    % Read the image
+    img = imread(imagePath);
+    
+    % Check if the image has a single channel
+    isGray = (size(img, 3) == 1);
+end
